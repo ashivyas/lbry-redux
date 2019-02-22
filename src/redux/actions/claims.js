@@ -9,9 +9,18 @@ import { selectSupportsByOutpoint } from 'redux/selectors/wallet';
 import { creditsToString } from 'util/formatCredits';
 import { batchActions } from 'util/batchActions';
 
+function unique(array) {
+  const filtr = {};
+  return array.filter(a => {
+    const res = !filtr[a] ? (filtr[a] = true) : false;
+    return res;
+  });
+}
+
 export function doResolveUris(uris: Array<string>, returnCachedClaims: boolean = false) {
   return (dispatch: Dispatch, getState: GetState) => {
-    const normalizedUris = uris.map(normalizeURI);
+    const filteredUris = unique(uris);
+    const normalizedUris = filteredUris.map(normalizeURI);
     const state = getState();
 
     const resolvingUris = selectResolvingUris(state);

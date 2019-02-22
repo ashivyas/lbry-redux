@@ -17,7 +17,7 @@ type Dispatch = (action: any) => any;
 type GetState = () => { search: SearchState };
 
 // We can't use env's because they aren't passed into node_modules
-let CONNECTION_STRING = 'https://lighthouse.lbry.com/';
+let CONNECTION_STRING = 'http://13.127.239.170:50005/';
 
 export const setSearchApi = (endpoint: string) => {
   CONNECTION_STRING = endpoint.replace(/\/*$/, '/'); // exactly one slash at the end;
