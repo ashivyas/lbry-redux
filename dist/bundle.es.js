@@ -171,6 +171,7 @@ const AUTHENTICATION_STARTED = 'AUTHENTICATION_STARTED';
 const AUTHENTICATION_SUCCESS = 'AUTHENTICATION_SUCCESS';
 const AUTHENTICATION_FAILURE = 'AUTHENTICATION_FAILURE';
 const USER_EMAIL_DECLINE = 'USER_EMAIL_DECLINE';
+const USER_LOGOUT_SUCCESS = 'USER_LOGOUT_SUCCESS';
 const USER_EMAIL_NEW_STARTED = 'USER_EMAIL_NEW_STARTED';
 const USER_EMAIL_NEW_SUCCESS = 'USER_EMAIL_NEW_SUCCESS';
 const USER_EMAIL_NEW_EXISTS = 'USER_EMAIL_NEW_EXISTS';
@@ -180,6 +181,8 @@ const USER_EMAIL_VERIFY_STARTED = 'USER_EMAIL_VERIFY_STARTED';
 const USER_EMAIL_VERIFY_SUCCESS = 'USER_EMAIL_VERIFY_SUCCESS';
 const USER_EMAIL_VERIFY_FAILURE = 'USER_EMAIL_VERIFY_FAILURE';
 const USER_EMAIL_VERIFY_RETRY = 'USER_EMAIL_VERIFY_RETRY';
+const USER_EMAIL_LOGIN = 'USER_EMAIL_LOGIN';
+const USER_GOOLE_SUCCESS = 'USER_GOOGLE_SUCCESS';
 const USER_PHONE_RESET = 'USER_PHONE_RESET';
 const USER_PHONE_NEW_STARTED = 'USER_PHONE_NEW_STARTED';
 const USER_PHONE_NEW_SUCCESS = 'USER_PHONE_NEW_SUCCESS';
@@ -200,6 +203,7 @@ const USER_INVITE_NEW_STARTED = 'USER_INVITE_NEW_STARTED';
 const USER_INVITE_NEW_SUCCESS = 'USER_INVITE_NEW_SUCCESS';
 const USER_INVITE_NEW_FAILURE = 'USER_INVITE_NEW_FAILURE';
 const FETCH_ACCESS_TOKEN_SUCCESS = 'FETCH_ACCESS_TOKEN_SUCCESS';
+const USER_VERIFY_ID = 'USER_VERIFY_ID';
 
 // Rewards
 const FETCH_REWARDS_STARTED = 'FETCH_REWARDS_STARTED';
@@ -389,6 +393,7 @@ var action_types = /*#__PURE__*/Object.freeze({
   AUTHENTICATION_SUCCESS: AUTHENTICATION_SUCCESS,
   AUTHENTICATION_FAILURE: AUTHENTICATION_FAILURE,
   USER_EMAIL_DECLINE: USER_EMAIL_DECLINE,
+  USER_LOGOUT_SUCCESS: USER_LOGOUT_SUCCESS,
   USER_EMAIL_NEW_STARTED: USER_EMAIL_NEW_STARTED,
   USER_EMAIL_NEW_SUCCESS: USER_EMAIL_NEW_SUCCESS,
   USER_EMAIL_NEW_EXISTS: USER_EMAIL_NEW_EXISTS,
@@ -398,6 +403,8 @@ var action_types = /*#__PURE__*/Object.freeze({
   USER_EMAIL_VERIFY_SUCCESS: USER_EMAIL_VERIFY_SUCCESS,
   USER_EMAIL_VERIFY_FAILURE: USER_EMAIL_VERIFY_FAILURE,
   USER_EMAIL_VERIFY_RETRY: USER_EMAIL_VERIFY_RETRY,
+  USER_EMAIL_LOGIN: USER_EMAIL_LOGIN,
+  USER_GOOLE_SUCCESS: USER_GOOLE_SUCCESS,
   USER_PHONE_RESET: USER_PHONE_RESET,
   USER_PHONE_NEW_STARTED: USER_PHONE_NEW_STARTED,
   USER_PHONE_NEW_SUCCESS: USER_PHONE_NEW_SUCCESS,
@@ -418,6 +425,7 @@ var action_types = /*#__PURE__*/Object.freeze({
   USER_INVITE_NEW_SUCCESS: USER_INVITE_NEW_SUCCESS,
   USER_INVITE_NEW_FAILURE: USER_INVITE_NEW_FAILURE,
   FETCH_ACCESS_TOKEN_SUCCESS: FETCH_ACCESS_TOKEN_SUCCESS,
+  USER_VERIFY_ID: USER_VERIFY_ID,
   FETCH_REWARDS_STARTED: FETCH_REWARDS_STARTED,
   FETCH_REWARDS_COMPLETED: FETCH_REWARDS_COMPLETED,
   CLAIM_REWARD_STARTED: CLAIM_REWARD_STARTED,
@@ -662,7 +670,7 @@ const CHECK_DAEMON_STARTED_TRY_NUMBER = 200;
 const Lbry = {
   isConnected: false,
   connectPromise: null,
-  daemonConnectionString: 'http://localhost:5279',
+  daemonConnectionString: 'http://localhost:5678',
   apiRequestHeaders: { 'Content-Type': 'application/json-rpc' },
 
   // Allow overriding daemon connection string (e.g. to `/api/proxy` for lbryweb)
@@ -2029,9 +2037,18 @@ function batchActions(...actions) {
 
 var _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+function unique(array) {
+  const filtr = {};
+  return array.filter(a => {
+    const res = !filtr[a] ? filtr[a] = true : false;
+    return res;
+  });
+}
+
 function doResolveUris(uris, returnCachedClaims = false) {
   return (dispatch, getState) => {
-    const normalizedUris = uris.map(normalizeURI);
+    const filteredUris = unique(uris);
+    const normalizedUris = filteredUris.map(normalizeURI);
     const state = getState();
 
     const resolvingUris = selectResolvingUris(state);
@@ -3069,7 +3086,7 @@ function handleFetchResponse(response) {
 const DEBOUNCED_SEARCH_SUGGESTION_MS = 300;
 
 // We can't use env's because they aren't passed into node_modules
-let CONNECTION_STRING = 'https://lighthouse.lbry.com/';
+let CONNECTION_STRING = 'http://13.127.239.170:50005/';
 
 const setSearchApi = endpoint => {
   CONNECTION_STRING = endpoint.replace(/\/*$/, '/'); // exactly one slash at the end;
